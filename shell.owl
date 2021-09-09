@@ -132,26 +132,18 @@ ObjectProperty: deprecated-by
     Annotations: 
         rdfs:comment "deprecated-by links a deprecation object with one or more identifier names. This is CPE 2.3 extension for identifier name deprecation."@en
     
+    SubPropertyOf: 
+        owl:topObjectProperty
+    
+    Characteristics: 
+        Irreflexive,
+        Asymmetric
+    
     Domain: 
         AdditionalInformation or NameCorrection
     
     Range: 
-        CPE
-    
-    
-ObjectProperty: deprecated_by
-
-    Annotations: 
-        rdfs:comment "deprecated_by is an object property inheritted from CPE 2.2. It is functional, because in CPE 2.2 a deprecated identifier name is supposed to be deprecated by only one new identifier name."@en
-    
-    Characteristics: 
-        Functional
-    
-    Domain: 
-        Deprecated
-    
-    Range: 
-        CPE
+        CPEEntry
     
     
 ObjectProperty: deprecation
@@ -159,12 +151,19 @@ ObjectProperty: deprecation
     Annotations: 
         rdfs:comment "depreaction links deprecated identifier with one or more Deprecation objects. This is CPE 2.3 extension for identifier name deprecation."@en
     
+    Characteristics: 
+        Irreflexive,
+        Asymmetric
+    
     Domain: 
         Deprecated
     
     Range: 
         Deprecation
     
+    
+ObjectProperty: owl:topObjectProperty
+
     
 DataProperty: SW_edition
 
@@ -175,7 +174,7 @@ DataProperty: SW_edition
         Functional
     
     Domain: 
-        CPE
+        CPEEntry
     
     Range: 
         xsd:string
@@ -221,7 +220,7 @@ If it is used, values for edition SHOULD capture edition-related terms applied b
         Functional
     
     Domain: 
-        CPE
+        CPEEntry
     
     Range: 
         xsd:string
@@ -236,7 +235,7 @@ DataProperty: language
         Functional
     
     Domain: 
-        CPE
+        CPEEntry
     
     Range: 
         xsd:string
@@ -251,7 +250,7 @@ DataProperty: other
         Functional
     
     Domain: 
-        CPE
+        CPEEntry
     
     Range: 
         xsd:string
@@ -266,7 +265,7 @@ DataProperty: product
         Functional
     
     Domain: 
-        CPE
+        CPEEntry
     
     Range: 
         xsd:string
@@ -281,7 +280,7 @@ DataProperty: target_HW
         Functional
     
     Domain: 
-        CPE
+        CPEEntry
     
     Range: 
         xsd:string
@@ -296,7 +295,7 @@ DataProperty: target_SW
         Functional
     
     Domain: 
-        CPE
+        CPEEntry
     
     Range: 
         xsd:string
@@ -311,7 +310,7 @@ DataProperty: update
         Functional
     
     Domain: 
-        CPE
+        CPEEntry
     
     Range: 
         xsd:string
@@ -326,7 +325,7 @@ DataProperty: vendor
         Functional
     
     Domain: 
-        CPE
+        CPEEntry
     
     Range: 
         xsd:string
@@ -341,7 +340,7 @@ DataProperty: version
         Functional
     
     Domain: 
-        CPE
+        CPEEntry
     
     Range: 
         xsd:string
@@ -362,7 +361,7 @@ Class: Application
         rdfs:comment "The part value “a”, when the WFN is for a class of applications."@en
     
     SubClassOf: 
-        CPE
+        CPEEntry
     
     
 Class: CPE
@@ -371,21 +370,47 @@ Class: CPE
         rdfs:comment "CPE represents identifier names. It is central class around which are organized all other classes and properties.
 CPE individual denotes a single CPE Name. It corresponds to cpe-item in CPE XSD."@en
     
+    SubClassOf: 
+        CPEEntry
+    
+    DisjointWith: 
+        Deprecated
+    
+    
+Class: CPEEntry
+
+    DisjointUnionOf: 
+        Application, Hardware, OS
+    
+    DisjointUnionOf: 
+        CPE, Deprecated
+    
+    DisjointWith: 
+        Deprecation
+    
     
 Class: Deprecated
 
     Annotations: 
-        rdfs:comment "Depreceted represents CPE identifiers that have been deprecated. These are cpe-item with attribute deprecated set to true."@en
+        rdfs:comment "Deprecated represents CPE identifiers that have been deprecated. These are cpe-item with attribute deprecated set to true."@en
     
     SubClassOf: 
+        CPEEntry
+    
+    DisjointWith: 
         CPE
-         and (Application or Hardware or OS)
     
     
 Class: Deprecation
 
     Annotations: 
         rdfs:comment "An element containing information for a specific deprecation of an identifier name. A single deprecation element may contain a list of names that the enclosing identifier name was deprecated by. One deprecation element represents a deprecation that occurred at a specific instant in time; it is possible that additional deprecations will occur at a later instant in time. If a dictionary maintainer must submit deprecation entries after the initial deprecation, then another deprecation element should be added to the identifier name."
+    
+    DisjointUnionOf: 
+        AdditionalInformation, NameCorrection, NameRemoval
+    
+    DisjointWith: 
+        CPEEntry
     
     
 Class: Hardware
@@ -394,7 +419,7 @@ Class: Hardware
         rdfs:comment "The part value “h”, when the WFN is for a class of hardware devices."@en
     
     SubClassOf: 
-        CPE
+        CPEEntry
     
     
 Class: NameCorrection
@@ -421,6 +446,9 @@ Class: OS
         rdfs:comment "The part value “o”, when the WFN is for a class of operating systems."@en
     
     SubClassOf: 
-        CPE
+        CPEEntry
     
     
+DisjointClasses: 
+    Application,Hardware,OS
+
