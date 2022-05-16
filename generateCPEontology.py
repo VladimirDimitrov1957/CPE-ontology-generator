@@ -2,12 +2,13 @@
 
 The generator downloads the current version of CPE Dictionary from NIST site and then generates OWL Manchester syntax ontology.
 The dictionary is downloaded as .zip file and then it is unzipped.
-The ontology is generated with the file name "cwe23.owl".
+The ontology is generated with the file name "cpe23.owl".
 All operations and files are placed in the current directory.
 """
 
 import urllib.request, re, sys, zipfile, argparse
 import xml.etree.ElementTree as etree
+import xmlschema
 from datetime import datetime
 from multiprocessing import Process, Queue, Manager, cpu_count, freeze_support, Lock
 
@@ -60,7 +61,7 @@ def escape(s):
 
 def generateIndividual(CPE23Names, inQueue, outQueue, separate, readLock):
         dp1 = "\t\t"
-        dp2 = ",\r" + dp1
+        dp2 = ",\r"
         not_def = {"-", "*"}
         item = inQueue.get()
         while item != "DONE":
@@ -160,60 +161,79 @@ def generateIndividual(CPE23Names, inQueue, outQueue, separate, readLock):
                         result += "\""
 
                 name_parts = cpe23_item.attrib["name"].replace("\\:", "\r").split(":")
+                someFact = False
                 for i in range(len(name_parts)):
                         name_parts[i] = name_parts[i].replace("\r", "\\:")
+                        if name_parts[i] and name_parts[i] != "*" and i != 3:
+                                if name_parts[i] == "-": name_parts[i] = ""
+                                someFact = True
                 cpe, cpe_ver, part, vendor, product, version, update, edition, language, SW_edition, target_SW, target_HW, other = name_parts
 
                 result += "\r\n\tTypes:\r\t\t"
-                if part == "a":
-                        result += "Application"
-                elif part == "o":
-                        result += "OS"
-                elif part == "h":
-                        result += "Hardware"
-                else:
-                        raise ValueError(cpe23name + "=>" + part)
-                        
-                result += "\r\t\tand "
                 if "deprecated" in item.attrib:
                         result += "Deprecated\r\n"
                 else:
                         result += "CPE\r\n"
+                if part != "*":
+                        result += "\r\t\tand "
+                        if part == "a":
+                                result += "Application"
+                        elif part == "o":
+                                result += "OS"
+                        elif part == "h":
+                                result += "Hardware"
+                        elif part == "":
+                                result += "NotAHO"
+                        else:
+                                raise ValueError(cpe23name + "=>" + part)
+      
+                someFact = someFact or "deprecation_date" in item.attrib
+                if someFact or "deprecation_date" in item.attrib:
+                        result += "\tFacts:\r"
+                        first = True
+                        if vendor != "*":
+                                result += dp1 + "vendor \"" + escape(vendor) + "\""
+                                first = False
+                        if product != "*":
+                                if not first: result += dp2
+                                result += dp1 + "product \"" + escape(product) + "\""
+                                first = False
+                        if version != "*":
+                                if not first: result += dp2
+                                result += dp1 + "version \"" + escape(version) + "\""
+                                first = False
+                        if update != "*":
+                                if not first: result += dp2
+                                result += dp1 + "update \"" + escape(update) + "\""
+                                first = False
+                        if edition != "*":
+                                if not first: result += dp2
+                                result += dp1 + "edition \"" + escape(edition) + "\""
+                                first = False
+                        if language != "*":
+                                if not first: result += dp2
+                                result += dp1 + "language \"" + escape(language) + "\""
+                                first = False
+                        if SW_edition != "*":
+                                if not first: result += dp2
+                                result += dp1 + "SW_edition \"" + escape(SW_edition) + "\""
+                                first = False
+                        if target_SW != "*":
+                                if not first: result += dp2
+                                result += dp1 + "target_SW \"" + escape(target_SW) + "\""
+                                first = False 
+                        if target_HW != "*":
+                                if not first: result += dp2
+                                result += dp1 + "target_HW \"" + escape(target_HW) + "\""
+                                first = False
+                        if other != "*":
+                                if not first: result += dp2
+                                result += dp1 + "other \"" + escape(other) + "\""
+                                first = False                
 
-                result += "\tFacts:\r"
-                result += dp1 + "vendor \"" + escape(vendor) + "\",\r"
-                result += dp1 + "product \"" + escape(product) + "\",\r"                                
-                result += dp1 + "version \"" + escape(version) + "\""                                
-                if update in not_def:
-                        if update == "-": result += dp2 + "update \"\""
-                else:
-                        result += dp2 + "update \"" + escape(update) + "\""
-                if edition in not_def:
-                        if edition == "-": result += dp2 + "edition \"\""
-                else:
-                        result += dp2 + "edition \"" + escape(edition) + "\""                                  
-                if language in not_def:
-                        if language == "-": result += dp2 + "language \"\""
-                else:
-                        result += dp2 + "language \"" + escape(language) + "\""                                 
-                if SW_edition in not_def:
-                        if SW_edition == "-": result += dp2 + "edition \"\""
-                else:
-                        result += dp2 + "SW_edition \"" + escape(SW_edition) + "\""                                
-                if target_SW in not_def:
-                        if target_SW == "-": result += dp2 + "target_SW \"\""
-                else:
-                        result += dp2 + "target_SW \"" + escape(target_SW) + "\""                                
-                if target_HW in not_def:
-                        if target_HW == "-": result += dp2 + "target_HW \"\""
-                else:
-                        result += dp2 + "target_HW \"" + escape(target_HW) + "\""                             
-                if other in not_def:
-                        if other == "-": result += dp2 + "other \"\""
-                else:
-                        result += dp2 + "other \"" + escape(other) + "\""                    
-
-                if "deprecation_date" in item.attrib: result += dp2 + "deprecation_date \"" + item.attrib["deprecation_date"] + "\"^^xsd:dateTime"
+                        if "deprecation_date" in item.attrib:
+                                if not first: result += dp2
+                                result += dp1 + "deprecation_date \"" + item.attrib["deprecation_date"] + "\"^^xsd:dateTime"
                 
                 #deprecated_by = item.attrib.get("deprecated_by")
                 #if deprecated_by is not None: result += ",\r\t\tdeprecated_by <" + deprecated_by + ">"
@@ -222,7 +242,11 @@ def generateIndividual(CPE23Names, inQueue, outQueue, separate, readLock):
                 for deprecation in cpe23_item.findall(ext_string + "deprecation"):
                        dname = cpe22name + "DEPREC" + str(no)
                        for deprecatedBy in deprecation.findall(ext_string + "deprecated-by"):
-                               result += ",\r\t\tdeprecation <" + dname + ">"
+                               if not someFact:
+                                       result += "\tFacts:\r\t\tdeprecation <" + dname + ">"
+                                       someFact = True
+                               else:
+                                       result += ",\r\t\tdeprecation <" + dname + ">"
                                no += 1
 
                 no = 1
@@ -314,7 +338,6 @@ def generateIndividuals(root, separate):
                                                 if sItem.get("deprecated", default = False): followChain(sItem)
         #End followChain()
                 
-                
         CPE23Names = getCPE23Names(root)
         outQueue = Queue()
         inQueue = Queue()
@@ -376,12 +399,17 @@ def generateIndividuals(root, separate):
         writer.join()
 
 def main(download, separate):
-        print("CPE 2.3 Ontology Generator, Version 5.6")
+        print("CPE 2.3 Ontology Generator, Version 6.1")
         start = datetime.now()
         print(start)
         if download:
                 print("Download CPE Dictionary")
                 downloadCPE23()
+        xs = xmlschema.XMLSchema("data/cpe-dictionary_2.3.xsd")
+        if not xs.is_valid("data/official-cpe-dictionary_v2.3.xml"):
+                print("CPE Dictionary contents is not valid!")
+                xs.validate("data/official-cpe-dictionary_v2.3.xml")
+                return
         root = parseXML()
         generateIndividuals(root, separate)
         print("Generation end")

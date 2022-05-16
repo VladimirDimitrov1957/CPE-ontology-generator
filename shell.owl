@@ -380,7 +380,7 @@ CPE individual denotes a single CPE Name. It corresponds to cpe-item in CPE XSD.
 Class: CPEEntry
 
     DisjointUnionOf: 
-        Application, Hardware, OS
+        Application, Hardware, NotAHO, OS
     
     DisjointUnionOf: 
         CPE, Deprecated
@@ -438,6 +438,12 @@ Class: NameRemoval
     
     SubClassOf: 
         Deprecation
+    
+    
+Class: NotAHO
+
+    SubClassOf: 
+        CPEEntry
     
     
 Class: OS
