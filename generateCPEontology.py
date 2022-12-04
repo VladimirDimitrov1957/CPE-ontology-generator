@@ -14,7 +14,7 @@ from multiprocessing import Process, Queue, Manager, cpu_count, freeze_support, 
 
 def codeString(s):
         temp = s.replace("\\", "\\\\")
-        return temp.replace("\"", "\\\"")
+        return temp.replace('"', '\\"')
 
 def downloadCPE23():
         url = "https://nvd.nist.gov/feeds/xml/cpe/dictionary/official-cpe-dictionary_v2.3.xml.zip"
@@ -59,6 +59,9 @@ def getByWildCards(CPE23Names, wildCard):
 def escape(s):
         return (s.replace("\\", "\\\\")).replace('"', '\\"')
 
+def clear(s):
+        return s.replace("\\\\", "\n").replace("\\", "").replace('"', '\\"').replace("\n", "\\\\")
+
 def generateIndividual(CPE23Names, inQueue, outQueue, separate, readLock):
         dp1 = "\t\t"
         dp2 = ",\r"
@@ -76,7 +79,7 @@ def generateIndividual(CPE23Names, inQueue, outQueue, separate, readLock):
 
                 print("Processing: " + cpe22name)
                 
-                result = "Individual: <" + cpe22name + ">\r\n"
+                result = "Individual: <" + cpe22name + ">"
 
                 title = item.find(dict_string + "title")
                 notes = item.find(dict_string + "notes")
@@ -85,7 +88,7 @@ def generateIndividual(CPE23Names, inQueue, outQueue, separate, readLock):
                 cpe23_item = item.find(ext_string + "cpe23-item")
                 provenance_record = cpe23_item.find(ext_string + "provenance-record")
                 if title is not None or notes is not None or references is not None or check is not None or provenance_record is not None:
-                        result += "\tAnnotations:"       
+                        result += "\r\tAnnotations:"       
 
                 first = True
                 for title in item.findall(dict_string + "title"):
@@ -163,19 +166,19 @@ def generateIndividual(CPE23Names, inQueue, outQueue, separate, readLock):
                 name_parts = cpe23_item.attrib["name"].replace("\\:", "\r").split(":")
                 someFact = False
                 for i in range(len(name_parts)):
-                        name_parts[i] = name_parts[i].replace("\r", "\\:")
+                        name_parts[i] = name_parts[i].replace("\r", ":")
                         if name_parts[i] and name_parts[i] != "*" and i != 3:
                                 if name_parts[i] == "-": name_parts[i] = ""
                                 someFact = True
                 cpe, cpe_ver, part, vendor, product, version, update, edition, language, SW_edition, target_SW, target_HW, other = name_parts
 
-                result += "\r\n\tTypes:\r\t\t"
+                result += "\r\tTypes:\r\t\t"
                 if "deprecated" in item.attrib:
-                        result += "Deprecated\r\n"
+                        result += "Deprecated"
                 else:
-                        result += "CPE\r\n"
+                        result += "CPE"
                 if part != "*":
-                        result += "\r\t\tand "
+                        result += " and "
                         if part == "a":
                                 result += "Application"
                         elif part == "o":
@@ -189,46 +192,46 @@ def generateIndividual(CPE23Names, inQueue, outQueue, separate, readLock):
       
                 someFact = someFact or "deprecation_date" in item.attrib
                 if someFact or "deprecation_date" in item.attrib:
-                        result += "\tFacts:\r"
+                        result += "\r\tFacts:\r"
                         first = True
                         if vendor != "*":
-                                result += dp1 + "vendor \"" + escape(vendor) + "\""
+                                result += dp1 + "vendor \"" + clear(vendor) + "\""
                                 first = False
                         if product != "*":
                                 if not first: result += dp2
-                                result += dp1 + "product \"" + escape(product) + "\""
+                                result += dp1 + "product \"" + clear(product) + "\""
                                 first = False
                         if version != "*":
                                 if not first: result += dp2
-                                result += dp1 + "version \"" + escape(version) + "\""
+                                result += dp1 + "version \"" + clear(version) + "\""
                                 first = False
                         if update != "*":
                                 if not first: result += dp2
-                                result += dp1 + "update \"" + escape(update) + "\""
+                                result += dp1 + "update \"" + clear(update) + "\""
                                 first = False
                         if edition != "*":
                                 if not first: result += dp2
-                                result += dp1 + "edition \"" + escape(edition) + "\""
+                                result += dp1 + "edition \"" + clear(edition) + "\""
                                 first = False
                         if language != "*":
                                 if not first: result += dp2
-                                result += dp1 + "language \"" + escape(language) + "\""
+                                result += dp1 + "language \"" + clear(language) + "\""
                                 first = False
                         if SW_edition != "*":
                                 if not first: result += dp2
-                                result += dp1 + "SW_edition \"" + escape(SW_edition) + "\""
+                                result += dp1 + "SW_edition \"" + clear(SW_edition) + "\""
                                 first = False
                         if target_SW != "*":
                                 if not first: result += dp2
-                                result += dp1 + "target_SW \"" + escape(target_SW) + "\""
+                                result += dp1 + "target_SW \"" + clear(target_SW) + "\""
                                 first = False 
                         if target_HW != "*":
                                 if not first: result += dp2
-                                result += dp1 + "target_HW \"" + escape(target_HW) + "\""
+                                result += dp1 + "target_HW \"" + clear(target_HW) + "\""
                                 first = False
                         if other != "*":
                                 if not first: result += dp2
-                                result += dp1 + "other \"" + escape(other) + "\""
+                                result += dp1 + "other \"" + clear(other) + "\""
                                 first = False                
 
                         if "deprecation_date" in item.attrib:
@@ -271,7 +274,7 @@ def generateIndividual(CPE23Names, inQueue, outQueue, separate, readLock):
                                                 else:
                                                         result += ",\r\t\tdeprecated-by <" + cpe22 + ">"
                         
-                outQueue.put(result + "\r\n")
+                outQueue.put(result + "\r")
                 item = inQueue.get()
 
 def writeResults(q, separate, np, lock, generator):
@@ -399,7 +402,7 @@ def generateIndividuals(root, separate):
         writer.join()
 
 def main(download, separate):
-        print("CPE 2.3 Ontology Generator, Version 6.1")
+        print("CPE 2.3 Ontology Generator, Version 6.3")
         start = datetime.now()
         print(start)
         if download:
