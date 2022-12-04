@@ -1,8 +1,8 @@
 """CPE ontology generator.
 
-The generator downloads the current version of CPE Dictionary from NIST site and then generates OWL Manchester syntax ontology.
+The generator downloads the current version of CPE Dictionary from NIST site and then generates OWL Turtle syntax ontology.
 The dictionary is downloaded as .zip file and then it is unzipped.
-The ontology is generated with the file name "cpe23.owl".
+The ontology is generated with the file name "cpe23.ttl".
 All operations and files are placed in the current directory.
 """
 
@@ -63,8 +63,6 @@ def clear(s):
         return s.replace("\\\\", "\n").replace("\\", "").replace('"', '\\"').replace("\n", "\\\\")
 
 def generateIndividual(CPE23Names, inQueue, outQueue, separate, readLock):
-        dp1 = "\t\t"
-        dp2 = ",\r"
         not_def = {"-", "*"}
         item = inQueue.get()
         while item != "DONE":
@@ -79,208 +77,120 @@ def generateIndividual(CPE23Names, inQueue, outQueue, separate, readLock):
 
                 print("Processing: " + cpe22name)
                 
-                result = "Individual: <" + cpe22name + ">"
-
-                title = item.find(dict_string + "title")
-                notes = item.find(dict_string + "notes")
-                references = item.find(dict_string + "references")
-                check = item.find(dict_string + "check")
+                result = "\r###  " + cpe22name + "\n<" + cpe22name + ">\r\trdf:type owl:NamedIndividual"
                 cpe23_item = item.find(ext_string + "cpe23-item")
-                provenance_record = cpe23_item.find(ext_string + "provenance-record")
-                if title is not None or notes is not None or references is not None or check is not None or provenance_record is not None:
-                        result += "\r\tAnnotations:"       
-
-                first = True
-                for title in item.findall(dict_string + "title"):
-                        if first:
-                                first = False
-                                result += "\r\t\ttitle \""
-                        else:
-                                result += ",\r\t\ttitle \""
-                        result += codeString(title.text) + "\""
-                        lang = title.attrib[lang_string]
-                        if lang is not None: result += "@" + lang
-                                
-                for notes in item.findall(dict_string + "notes"):
-                        lang = notes.attrib[lang_string]
-                        for note in notes.findall(dict_string + "note"):
-                                if first:
-                                        first = False
-                                        result += "\r\t\tnote \""
-                                else:
-                                        result += ",\r\t\tnote \""
-                                result += codeString(note.text) + "\""
-                                if lang is not None: result += "@" + lang
-                                
-                if references is not None:
-                        for reference in references.findall(dict_string + "reference"):
-                                if first:
-                                        first = False
-                                        result += "\r\t\treference \""
-                                else:
-                                        result += ",\r\t\treference \""
-                                result += codeString(reference.text)
-                                href = reference.attrib["href"]
-                                if href is not None:
-                                        result += "\rHREF: " + codeString(href)
-                                result += "\""
-
-                for check in item.findall(dict_string + "check"):
-                        if first:
-                                first = False
-                                result += "\r\t\tcheck \""
-                        else:
-                                result += ",\r\t\tcheck \""
-                        result += codeString(check.text) + "\rSystem: " + codeString(check.attrib["system"])
-                        if "href" in check.attrib: result += "\rHREF: " + codeString(check.attrib["href"])
-                        result += "\""
-
-                for provenance_record in item.findall(dict_string + "provenance-record"):
-                        if first:
-                                first = False
-                                result += "\r\t\tprovenance-record \""
-                        else:
-                                result += ",\r\t\tprovenance-record \""
-                        submitter = provenance_record.find(dict_string + "submitter")
-                        result += "\rSubmitter:\r\t" + codeString(submitter.text)
-                        result += "\r\tName: " + codeString(submitter.attrib["name"])
-                        result += "\r\tSystem-ID: " + codeString(submitter.attrib["system-id"])
-                        result += "\r\tDate: " + codeString(submitter.attrib["date"])
-                        for authority in provenance_record.findall(dict_string + "authority"):
-                                result += "\rAuthority:\r\t" + codeString(authority.text)
-                                result += "\r\tName: " + codeString(authority.attrib["name"])
-                                result += "\r\tSystem-ID: " + codeString(authority.attrib["system-id"])
-                                result += "\r\tDate: " + codeString(authority.attrib["date"])
-                        for change_description in provenance_record.findall(dict_string + "change-description"):
-                                result += "\rChange description:\r\tType " + codeString(change_description.attrib["change-type"])
-                                if "date" in change_description.attrib: result += "\r\tDate: " + codeString(change_description.attrib["date"])
-                                evidence_reference = change_description.find(dict_string + "evidence-reference")
-                                if evidence_reference is not None:
-                                        result += "\r\tEvidence: " + codeString(evidence_reference.text)
-                                        result += "\r\tEvidence type: " + codeString(evidence_reference.attrib["evidence"])
-                                comments = change_description.find(dict_string + "comments")
-                                if comments is not None:
-                                        result += "\r\tComments: " + codeString(comments.text)
-                        result += "\""
-
                 name_parts = cpe23_item.attrib["name"].replace("\\:", "\r").split(":")
-                someFact = False
                 for i in range(len(name_parts)):
                         name_parts[i] = name_parts[i].replace("\r", ":")
                         if name_parts[i] and name_parts[i] != "*" and i != 3:
                                 if name_parts[i] == "-": name_parts[i] = ""
-                                someFact = True
                 cpe, cpe_ver, part, vendor, product, version, update, edition, language, SW_edition, target_SW, target_HW, other = name_parts
-
-                result += "\r\tTypes:\r\t\t"
                 if "deprecated" in item.attrib:
-                        result += "Deprecated"
+                        result += " ;\r\trdf:type :Deprecated"
                 else:
-                        result += "CPE"
+                        result += " ;\r\trdf:type :CPE"
                 if part != "*":
-                        result += " and "
+                        #result += ",\r\t\t"
                         if part == "a":
-                                result += "Application"
+                                result += " ;\r\trdf:type :Application"
                         elif part == "o":
-                                result += "OS"
+                                result += " ;\r\trdf:type :OS"
                         elif part == "h":
-                                result += "Hardware"
+                                result += " ;\r\trdf:type :Hardware"
                         elif part == "":
-                                result += "NotAHO"
+                                result += " ;\r\trdf:type :NotAHO"
                         else:
                                 raise ValueError(cpe23name + "=>" + part)
-      
-                someFact = someFact or "deprecation_date" in item.attrib
-                if someFact or "deprecation_date" in item.attrib:
-                        result += "\r\tFacts:\r"
-                        first = True
-                        if vendor != "*":
-                                result += dp1 + "vendor \"" + clear(vendor) + "\""
-                                first = False
-                        if product != "*":
-                                if not first: result += dp2
-                                result += dp1 + "product \"" + clear(product) + "\""
-                                first = False
-                        if version != "*":
-                                if not first: result += dp2
-                                result += dp1 + "version \"" + clear(version) + "\""
-                                first = False
-                        if update != "*":
-                                if not first: result += dp2
-                                result += dp1 + "update \"" + clear(update) + "\""
-                                first = False
-                        if edition != "*":
-                                if not first: result += dp2
-                                result += dp1 + "edition \"" + clear(edition) + "\""
-                                first = False
-                        if language != "*":
-                                if not first: result += dp2
-                                result += dp1 + "language \"" + clear(language) + "\""
-                                first = False
-                        if SW_edition != "*":
-                                if not first: result += dp2
-                                result += dp1 + "SW_edition \"" + clear(SW_edition) + "\""
-                                first = False
-                        if target_SW != "*":
-                                if not first: result += dp2
-                                result += dp1 + "target_SW \"" + clear(target_SW) + "\""
-                                first = False 
-                        if target_HW != "*":
-                                if not first: result += dp2
-                                result += dp1 + "target_HW \"" + clear(target_HW) + "\""
-                                first = False
-                        if other != "*":
-                                if not first: result += dp2
-                                result += dp1 + "other \"" + clear(other) + "\""
-                                first = False                
+                for title in item.findall(dict_string + "title"):
+                        result += " ;\r\t:title \"" + codeString(title.text) + "\""
+                        lang = title.attrib[lang_string]
+                        if lang is not None: result += "@" + lang
+                for notes in item.findall(dict_string + "notes"):
+                        lang = notes.attrib[lang_string]
+                        for note in notes.findall(dict_string + "note"):
+                                result += ' ;\r\t:note "' + codeString(note.text) + '"'
+                                if lang is not None: result += "@" + lang
+                references = item.find(dict_string + "references")
+                if references is not None:
+                        for reference in references.findall(dict_string + "reference"):
+                                result += ' ;\r\t:reference """' + codeString(reference.text)
+                                href = reference.attrib["href"]
+                                if href is not None:
+                                        result += "\nHREF: " + codeString(href)
+                                result += '"""'
+                for check in item.findall(dict_string + "check"):
+                        result += ' ;\r\t:check """' + codeString(check.text)
+                        result += codeString(check.text) + "\nSystem: " + codeString(check.attrib["system"])
+                        if "href" in check.attrib: result += "\nHREF: " + codeString(check.attrib["href"])
+                        result += '"""'
+                for provenance_record in item.findall(dict_string + "provenance-record"):
+                        result += ' ;\r\t:provenance-record """'
+                        submitter = provenance_record.find(dict_string + "submitter")
+                        result += "\nSubmitter:\r\t" + codeString(submitter.text)
+                        result += "\n\tName: " + codeString(submitter.attrib["name"])
+                        result += "\n\tSystem-ID: " + codeString(submitter.attrib["system-id"])
+                        result += "\n\tDate: " + codeString(submitter.attrib["date"])
+                        for authority in provenance_record.findall(dict_string + "authority"):
+                                result += "\nAuthority:\r\t" + codeString(authority.text)
+                                result += "\r\tName: " + codeString(authority.attrib["name"])
+                                result += "\n\tSystem-ID: " + codeString(authority.attrib["system-id"])
+                                result += "\n\tDate: " + codeString(authority.attrib["date"])
+                        for change_description in provenance_record.findall(dict_string + "change-description"):
+                                result += "\nChange description:\n\tType " + codeString(change_description.attrib["change-type"])
+                                if "date" in change_description.attrib: result += "\n\tDate: " + codeString(change_description.attrib["date"])
+                                evidence_reference = change_description.find(dict_string + "evidence-reference")
+                                if evidence_reference is not None:
+                                        result += "\n\tEvidence: " + codeString(evidence_reference.text)
+                                        result += "\n\tEvidence type: " + codeString(evidence_reference.attrib["evidence"])
+                                comments = change_description.find(dict_string + "comments")
+                                if comments is not None:
+                                        result += "\n\tComments: " + codeString(comments.text)
+                        result += '"""'
+                if vendor != "*": result += ' ;\r\t:vendor "' + clear(vendor) + '"'
+                if product != "*": result += ' ;\r\t:product "' + clear(product) + '"'
+                if version != "*": result += ' ;\r\t:version "' + clear(version) + '"'
+                if update != "*": result += ' ;\r\t:update "' + clear(update) + '"'
+                if edition != "*": result += ' ;\r\t:edition "' + clear(edition) + '"'
+                if language != "*": result += ' ;\r\t:language "' + clear(language) + '"'
+                if SW_edition != "*": result += ' ;\r\t:SW_edition "' + clear(SW_edition) + '"'
+                if target_SW != "*": result += ' ;\r\t:target_SW "' + clear(target_SW) + '"'
+                if target_HW != "*": result += ' ;\r\t:target_HW "' + clear(target_HW) + '"'
+                if other != "*": result += ' ;\r\t:other "' + clear(other) + '"'
+                if "deprecation_date" in item.attrib: result += ' ;\r\t:deprecation_date "' + item.attrib["deprecation_date"] + '"^^xsd:dateTime'
 
-                        if "deprecation_date" in item.attrib:
-                                if not first: result += dp2
-                                result += dp1 + "deprecation_date \"" + item.attrib["deprecation_date"] + "\"^^xsd:dateTime"
-                
-                #deprecated_by = item.attrib.get("deprecated_by")
-                #if deprecated_by is not None: result += ",\r\t\tdeprecated_by <" + deprecated_by + ">"
+                deprecated_by = item.attrib.get("deprecated_by")
+                if deprecated_by is not None: result += " ;\r\t:deprecated_by <" + deprecated_by + ">"
 
                 no = 1
                 for deprecation in cpe23_item.findall(ext_string + "deprecation"):
                        dname = cpe22name + "DEPREC" + str(no)
                        for deprecatedBy in deprecation.findall(ext_string + "deprecated-by"):
-                               if not someFact:
-                                       result += "\tFacts:\r\t\tdeprecation <" + dname + ">"
-                                       someFact = True
-                               else:
-                                       result += ",\r\t\tdeprecation <" + dname + ">"
+                               result += " ;\r\t:deprecation <" + dname + ">"
                                no += 1
 
                 no = 1
                 for deprecation in cpe23_item.findall(ext_string + "deprecation"):
                         dname = cpe22name + "DEPREC" + str(no)
                         for deprecatedBy in deprecation.findall(ext_string + "deprecated-by"):
-                                result += "\r\nIndividual: <" + dname + ">\r\n\tTypes:\r\t\t"
+                                result = "\r###  " + dname + "\n<" + dname + ">\r\trdf:type owl:NamedIndividual"
                                 deprecation_type = deprecatedBy.attrib.get("type")
                                 if deprecation_type == "NAME_CORRECTION":
-                                        result += "NameCorrection"
+                                        result += " ;\r\trdf:type :NameCorrection"
                                 elif deprecation_type == "NAME_REMOVAL":
-                                        result += "NameRemoval"
+                                        result += " ;\r\trdf:type :NameRemoval"
                                 elif deprecation_type == "ADDITIONAL_INFORMATION":
-                                        result += "AdditionalInformation"
-                                result += "\r\n\tFacts:\r"
-                                first = True
+                                        result += " ;\r\trdf:type :AdditionalInformation"
                                 for cpe22 in getByWildCards(CPE23Names, deprecatedBy.attrib["name"]):
                                         if cpe22 != cpe22name:
-                                                if first:
-                                                        result += dp1 + "deprecated-by <" + cpe22 + ">"
-                                                        first = False
-                                                else:
-                                                        result += ",\r\t\tdeprecated-by <" + cpe22 + ">"
-                        
-                outQueue.put(result + "\r")
+                                                result += " ;\r\trdf:deprecated-by <" + cpe22 + ">"
+
+                outQueue.put(result + " ;\r\trdf:type owl:Thing .\r")
                 item = inQueue.get()
 
 def writeResults(q, separate, np, lock, generator):
 
         def generateShell(out_file):
-                with open("shell.owl", mode='r', encoding='utf-8') as in_file:
+                with open("shell.ttl", mode='r', encoding='utf-8') as in_file:
                         shell = in_file.read()
                         if generator is not None:
                                 product_name = generator.find(dict_string + "product_name")
@@ -297,11 +207,11 @@ def writeResults(q, separate, np, lock, generator):
                 
         if separate:
                 count = 1
-                fn = "results/cpe23-" + str(count) + ".owl"
+                fn = "results/cpe23-" + str(count) + ".ttl"
                 p = np
                 lock.acquire()
         else:
-                fn = "results/cpe23.owl"
+                fn = "results/cpe23.ttl"
         out_file = open(fn, mode='w', encoding='utf-8')
         generateShell(out_file)
                 
@@ -312,7 +222,7 @@ def writeResults(q, separate, np, lock, generator):
                         if p == 0: 
                                 out_file.close()
                                 count += 1
-                                fn = "results/cpe23-" + str(count) + ".owl"
+                                fn = "results/cpe23-" + str(count) + ".omn"
                                 out_file = open(fn, mode='w', encoding='utf-8')
                                 generateShell(out_file)
                                 p = np
@@ -402,7 +312,7 @@ def generateIndividuals(root, separate):
         writer.join()
 
 def main(download, separate):
-        print("CPE 2.3 Ontology Generator, Version 6.3")
+        print("CPE 2.3 Ontology Generator, Version 8.3")
         start = datetime.now()
         print(start)
         if download:
