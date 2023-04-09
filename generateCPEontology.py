@@ -11,6 +11,7 @@ import xml.etree.ElementTree as etree
 import xmlschema
 from datetime import datetime
 from multiprocessing import Process, Queue, Manager, cpu_count, freeze_support, Lock
+from pathlib import Path
 
 def codeString(s):
         temp = s.replace("\\", "\\\\")
@@ -205,6 +206,12 @@ def writeResults(q, separate, np, lock, generator):
                                 shell = shell.replace("TIMESTAMP", timestamp)
                                 out_file.write(shell)
                 
+        p = Path("results")
+        try:
+                p.mkdir()
+        except FileExistsError as exc:
+                print(exc)
+                
         if separate:
                 count = 1
                 fn = "results/cpe23-" + str(count) + ".ttl"
@@ -212,26 +219,47 @@ def writeResults(q, separate, np, lock, generator):
                 lock.acquire()
         else:
                 fn = "results/cpe23.ttl"
-        out_file = open(fn, mode='w', encoding='utf-8')
+
+        try:
+                out_file = open(fn, mode='w', encoding='utf-8')
+        except Exception as err:
+                print(f"Unexpected {err=}, {type(err)=}")
+                return
+
         generateShell(out_file)
                 
         msg = q.get()
         while msg != "DONE":
                 if separate and msg == "NEXT_PART":
                         p -= 1
-                        if p == 0: 
-                                out_file.close()
+                        if p == 0:
+                                try:
+                                        out_file.close()
+                                except Exception as err:
+                                        print(f"Unexpected {err=}, {type(err)=}")
+                                        exit
                                 count += 1
-                                fn = "results/cpe23-" + str(count) + ".omn"
-                                out_file = open(fn, mode='w', encoding='utf-8')
+                                fn = "results/cpe23-" + str(count) + ".ttl"
+                                try:
+                                        out_file = open(fn, mode='w', encoding='utf-8')
+                                except Exception as err:
+                                        print(f"Unexpected {err=}, {type(err)=}")
+                                        exit
                                 generateShell(out_file)
                                 p = np
                                 lock.release()
                                 lock.acquire()
                 else:
-                        out_file.write(msg)
+                        try:
+                                out_file.write(msg)
+                        except Exception as err:
+                                print(f"Unexpected {err=}, {type(err)=}")
+                                exit
                 msg = q.get()
-        out_file.close()
+        try:
+                out_file.close()
+        except Exception as err:
+                print(f"Unexpected {err=}, {type(err)=}")
 
 def generateIndividuals(root, separate):
 
@@ -284,6 +312,7 @@ def generateIndividuals(root, separate):
                 
         count = 0
         for item in root.findall(dict_string + "cpe-item"):
+                if not writer.is_alive(): exit
                 print(item.attrib["name"])
                 inQueue.put(item)
                 if separate:
@@ -312,7 +341,7 @@ def generateIndividuals(root, separate):
         writer.join()
 
 def main(download, separate):
-        print("CPE 2.3 Ontology Generator, Version 8.3")
+        print("CPE 2.3 Ontology Generator, Version 8.4")
         start = datetime.now()
         print(start)
         if download:
