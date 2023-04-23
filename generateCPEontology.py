@@ -20,12 +20,16 @@ def codeString(s):
 def downloadCPE23():
         url = "https://nvd.nist.gov/feeds/xml/cpe/dictionary/official-cpe-dictionary_v2.3.xml.zip"
         fileName = "data/official-cpe-dictionary_v2.3.xml.zip"
-        with urllib.request.urlopen(url) as response:
-                contents = response.read()
-                with open(fileName, mode='wb') as out_file:
-                        out_file.write(contents)
-        with zipfile.ZipFile(fileName, 'r') as zip_ref:
-            zip_ref.extractall(path="data")
+        try:
+                with urllib.request.urlopen(url) as response:
+                        contents = response.read()
+                        with open(fileName, mode='wb') as out_file:
+                                out_file.write(contents)
+                with zipfile.ZipFile(fileName, 'r') as zip_ref:
+                    zip_ref.extractall(path="data")
+        except Exception as err:
+                print(f"Unexpected {err=}, {type(err)=}")
+                exit
 
 def parseXML():
         xml_fn = "data/official-cpe-dictionary_v2.3.xml"
@@ -66,6 +70,7 @@ def clear(s):
 def generateIndividual(CPE23Names, inQueue, outQueue, separate, readLock):
         not_def = {"-", "*"}
         item = inQueue.get()
+        
         while item != "DONE":
                 if item == "NEXT_PART":
                         outQueue.put(item)
@@ -77,7 +82,7 @@ def generateIndividual(CPE23Names, inQueue, outQueue, separate, readLock):
                 cpe22name = item.attrib["name"]
 
                 print("Processing: " + cpe22name)
-                
+                        
                 result = "\r###  " + cpe22name + "\n<" + cpe22name + ">\r\trdf:type owl:NamedIndividual"
                 cpe23_item = item.find(ext_string + "cpe23-item")
                 name_parts = cpe23_item.attrib["name"].replace("\\:", "\r").split(":")
@@ -91,7 +96,6 @@ def generateIndividual(CPE23Names, inQueue, outQueue, separate, readLock):
                 else:
                         result += " ;\r\trdf:type :CPE"
                 if part != "*":
-                        #result += ",\r\t\t"
                         if part == "a":
                                 result += " ;\r\trdf:type :Application"
                         elif part == "o":
@@ -173,7 +177,7 @@ def generateIndividual(CPE23Names, inQueue, outQueue, separate, readLock):
                 for deprecation in cpe23_item.findall(ext_string + "deprecation"):
                         dname = cpe22name + "DEPREC" + str(no)
                         for deprecatedBy in deprecation.findall(ext_string + "deprecated-by"):
-                                result = "\r###  " + dname + "\n<" + dname + ">\r\trdf:type owl:NamedIndividual"
+                                result += " ;\r\trdf:type owl:Thing .\r###  " + dname + "\n<" + dname + ">\r\trdf:type owl:NamedIndividual"
                                 deprecation_type = deprecatedBy.attrib.get("type")
                                 if deprecation_type == "NAME_CORRECTION":
                                         result += " ;\r\trdf:type :NameCorrection"
@@ -219,13 +223,7 @@ def writeResults(q, separate, np, lock, generator):
                 lock.acquire()
         else:
                 fn = "results/cpe23.ttl"
-
-        try:
-                out_file = open(fn, mode='w', encoding='utf-8')
-        except Exception as err:
-                print(f"Unexpected {err=}, {type(err)=}")
-                return
-
+        out_file = open(fn, mode='w', encoding='utf-8')
         generateShell(out_file)
                 
         msg = q.get()
@@ -233,33 +231,18 @@ def writeResults(q, separate, np, lock, generator):
                 if separate and msg == "NEXT_PART":
                         p -= 1
                         if p == 0:
-                                try:
-                                        out_file.close()
-                                except Exception as err:
-                                        print(f"Unexpected {err=}, {type(err)=}")
-                                        exit
+                                out_file.close()
                                 count += 1
                                 fn = "results/cpe23-" + str(count) + ".ttl"
-                                try:
-                                        out_file = open(fn, mode='w', encoding='utf-8')
-                                except Exception as err:
-                                        print(f"Unexpected {err=}, {type(err)=}")
-                                        exit
+                                out_file = open(fn, mode='w', encoding='utf-8')
                                 generateShell(out_file)
                                 p = np
                                 lock.release()
                                 lock.acquire()
                 else:
-                        try:
-                                out_file.write(msg)
-                        except Exception as err:
-                                print(f"Unexpected {err=}, {type(err)=}")
-                                exit
+                        out_file.write(msg)
                 msg = q.get()
-        try:
-                out_file.close()
-        except Exception as err:
-                print(f"Unexpected {err=}, {type(err)=}")
+        out_file.close()
 
 def generateIndividuals(root, separate):
 
@@ -313,7 +296,6 @@ def generateIndividuals(root, separate):
         count = 0
         for item in root.findall(dict_string + "cpe-item"):
                 if not writer.is_alive(): exit
-                print(item.attrib["name"])
                 inQueue.put(item)
                 if separate:
                         count += 1
@@ -331,7 +313,6 @@ def generateIndividuals(root, separate):
                                 count = 0
                                 currentCPEnames = set()
 
-        print("Processing finished")
         for i in range(np):
                 inQueue.put("DONE")
         for i in range(np):
@@ -339,6 +320,7 @@ def generateIndividuals(root, separate):
 
         outQueue.put("DONE")
         writer.join()
+        print("Processing finished")
 
 def main(download, separate):
         print("CPE 2.3 Ontology Generator, Version 8.4")

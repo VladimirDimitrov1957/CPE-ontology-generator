@@ -1,19 +1,18 @@
+@prefix : <http://www.semanticweb.org/cpe#> .
 @prefix dc: <http://purl.org/dc/elements/1.1/> .
 @prefix owl: <http://www.w3.org/2002/07/owl#> .
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix xml: <http://www.w3.org/XML/1998/namespace> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
-@prefix : <http://www.semanticweb.org/cpe#> .
 @base <http://www.semanticweb.org/cpe> .
 
 <http://www.semanticweb.org/cpe> rdf:type owl:Ontology ;
-              owl:versionIRI <http://cpe> ;
-              :generator """PRODUCT_NAME
+                                  :generator """PRODUCT_NAME
 PRODUCT_VERSION
 SCHEMA_VERSION
 TIMESTAMP"""@en ;
-              rdfs:comment """Official Common Platform Enumeration (CPE) Dictionary
+                                  rdfs:comment """Official Common Platform Enumeration (CPE) Dictionary
 CPE is a structured naming scheme for information technology systems, software, and packages. Based upon the generic syntax for Uniform Resource Identifiers (URI), CPE includes a formal name format, a method for checking names against a system, and a description format for binding text and tests to a name.
 Below is the current official version of the CPE Product Dictionary. The dictionary provides an agreed upon list of official CPE names. The dictionary is provided in XML format and is available to the general public. Please check back frequently as the CPE Product Dictionary will continue to grow to include all past, present and future product releases. The CPE Dictionary is updated nightly when modifications or new names are added.
 As of December 2009, The National Vulnerability Database is now accepting contributions to the Official CPE Dictionary. Organizations interested in submitting CPE Names should contact the NVD CPE team at cpe_dictionary@nist.gov for help with the processing of their submission.
@@ -23,14 +22,14 @@ CPE Dictionary
 Neal Ziring, Andrew Buttner, David Waltermire
 2.3
 2011-07-29"""@en ;
-              rdfs:isDefinedBy "Vladimir Dimitrov"@en ;
-              owl:versionInfo "3.0.0"@en .
+                                  rdfs:isDefinedBy "Vladimir Dimitrov"@en ;
+                                  owl:versionInfo "3.0.0"@en .
 
 #################################################################
 #    Annotation properties
 #################################################################
 
-###  http://cpe#check
+###  http://www.semanticweb.org/cpe#check
 :check rdf:type owl:AnnotationProperty ;
        rdfs:comment """The CheckType complex type is used to define an element to hold information about an individual check. It includes a checking system specification URI, string content, and an optional external file reference. The checking system specification should be the URI for a particular version of OVAL or a related system testing language, and the content will be an identifier of a test written in that language. The external file reference could be used to point to the file in which the content test identifier is defined.
 The last two lines are the atrributes system and href."""@en ;
@@ -38,7 +37,7 @@ The last two lines are the atrributes system and href."""@en ;
        rdfs:domain :CPE .
 
 
-###  http://cpe#generator
+###  http://www.semanticweb.org/cpe#generator
 :generator rdf:type owl:AnnotationProperty ;
            rdfs:comment """The GeneratorType complex type defines an element that is used to hold information about when a particular document was compiled, what version of the schema was used, what tool compiled the document, and what version of that tool was used. Additional generator information is also allowed although it is not part of the official schema. Individual organizations can place generator information that they feel is important and it will be skipped during the validation. All that this schema really cares about is that the stated generator information is there.
 The optional product_name element specifies the name of the application used to generate the file.
@@ -49,21 +48,21 @@ For example, a document might pull a bunch of existing items together, each of w
            rdfs:range rdf:PlainLiteral .
 
 
-###  http://cpe#note
+###  http://www.semanticweb.org/cpe#note
 :note rdf:type owl:AnnotationProperty ;
       rdfs:comment "The NotesType complex type defines an element that consists of one or more child note elements. It is assumed that each of these note elements is representative of the same language as defined by their parent."@en ;
       rdfs:range rdf:PlainLiteral ;
       rdfs:domain :CPE .
 
 
-###  http://cpe#provenance-record
+###  http://www.semanticweb.org/cpe#provenance-record
 :provenance-record rdf:type owl:AnnotationProperty ;
                    rdfs:comment "The provenance-record contains information about the CPE submitter (name, system id, date of submission), involved CPE authorities (name, system id, date of involvement) and changes (date of change, evidence, evidence type, comments)."@en ;
                    rdfs:range rdf:PlainLiteral ;
                    rdfs:domain :CPE .
 
 
-###  http://cpe#reference
+###  http://www.semanticweb.org/cpe#reference
 :reference rdf:type owl:AnnotationProperty ;
            rdfs:comment """The reference collects several individual references. Each reference consists of a piece of text (intended to be human-readable) and a URI (intended to be a URL, and point to a real resource) and is used to point to extra descriptive material, for example a supplier's web site or platform documentation.
 The reference URI is the last line."""@en ;
@@ -71,7 +70,7 @@ The reference URI is the last line."""@en ;
            rdfs:domain :CPE .
 
 
-###  http://cpe#title
+###  http://www.semanticweb.org/cpe#title
 :title rdf:type owl:AnnotationProperty ;
        rdfs:comment """The title is a string with xml:lang attribute to associate a specific language with an element's string content. There is no more than one title for every language.
 This is the human readable name of the identifier."""@en ;
@@ -115,7 +114,7 @@ xsd:string rdf:type rdfs:Datatype .
 #    Object Properties
 #################################################################
 
-###  http://cpe#deprecated-by
+###  http://www.semanticweb.org/cpe#deprecated-by
 :deprecated-by rdf:type owl:ObjectProperty ;
                rdfs:subPropertyOf owl:topObjectProperty ;
                rdf:type owl:AsymmetricProperty ,
@@ -129,7 +128,7 @@ xsd:string rdf:type rdfs:Datatype .
                rdfs:comment "deprecated-by links a deprecation object with one or more identifier names. This is CPE 2.3 extension for identifier name deprecation."@en .
 
 
-###  http://cpe#deprecation
+###  http://www.semanticweb.org/cpe#deprecation
 :deprecation rdf:type owl:ObjectProperty ,
                       owl:AsymmetricProperty ,
                       owl:IrreflexiveProperty ;
@@ -146,7 +145,7 @@ owl:topObjectProperty rdf:type owl:ObjectProperty .
 #    Data properties
 #################################################################
 
-###  http://cpe#SW_edition
+###  http://www.semanticweb.org/cpe#SW_edition
 :SW_edition rdf:type owl:DatatypeProperty ,
                      owl:FunctionalProperty ;
             rdfs:domain :CPEEntry ;
@@ -154,7 +153,7 @@ owl:topObjectProperty rdf:type owl:ObjectProperty .
             rdfs:comment "Values for SW_edition SHOULD characterize how the product is tailored to a particular market or class of end users. Values SHOULD be selected from a specific valid-values list, which MAY be defined by other specifications that utilize this specification. Any character string meeting the requirements for WFNs (cf. 5.3.2) MAY be specified as a value."@en .
 
 
-###  http://cpe#deprecation-date
+###  http://www.semanticweb.org/cpe#deprecation-date
 :deprecation-date rdf:type owl:DatatypeProperty ,
                            owl:FunctionalProperty ;
                   rdfs:domain :Deprecation ;
@@ -162,7 +161,7 @@ owl:topObjectProperty rdf:type owl:ObjectProperty .
                   rdfs:comment "The deprecation date of the part."@en .
 
 
-###  http://cpe#deprecation_date
+###  http://www.semanticweb.org/cpe#deprecation_date
 :deprecation_date rdf:type owl:DatatypeProperty ,
                            owl:FunctionalProperty ;
                   rdfs:domain :Deprecated ;
@@ -170,7 +169,7 @@ owl:topObjectProperty rdf:type owl:ObjectProperty .
                   rdfs:comment "The deprecation date as specified in CPE 2.2."@en .
 
 
-###  http://cpe#edition
+###  http://www.semanticweb.org/cpe#edition
 :edition rdf:type owl:DatatypeProperty ,
                   owl:FunctionalProperty ;
          rdfs:domain :CPEEntry ;
@@ -179,7 +178,7 @@ owl:topObjectProperty rdf:type owl:ObjectProperty .
 If it is used, values for edition SHOULD capture edition-related terms applied by the vendor to the product. Values SHOULD be selected from a specific valid-values list, which MAY be defined by other specifications that utilize this specification. Any character string meeting the requirements for WFNs (cf. 5.3.2) MAY be specified as a value."""@en .
 
 
-###  http://cpe#language
+###  http://www.semanticweb.org/cpe#language
 :language rdf:type owl:DatatypeProperty ,
                    owl:FunctionalProperty ;
           rdfs:domain :CPEEntry ;
@@ -187,7 +186,7 @@ If it is used, values for edition SHOULD capture edition-related terms applied b
           rdfs:comment "Values for language SHALL be valid language tags as defined by [RFC5646], and SHOULD be used to define the language supported in the user interface of the product being described. Although any valid language tag MAY be used, only tags containing language and region codes SHOULD be used."@en .
 
 
-###  http://cpe#other
+###  http://www.semanticweb.org/cpe#other
 :other rdf:type owl:DatatypeProperty ,
                 owl:FunctionalProperty ;
        rdfs:domain :CPEEntry ;
@@ -195,7 +194,7 @@ If it is used, values for edition SHOULD capture edition-related terms applied b
        rdfs:comment "Values for other SHOULD capture any other general descriptive or identifying information which is vendor- or product-specific and which does not logically fit in any other data property value. Values SHOULD NOT be used for storing instance-specific data (e.g., globally-unique identifiers or Internet Protocol addresses). Values SHOULD be selected from a valid-values list that is refined over time; this list MAY be defined by other specifications that utilize this specification. Any character string meeting the requirements for WFNs (cf. 5.3.2) MAY be specified as a value."@en .
 
 
-###  http://cpe#product
+###  http://www.semanticweb.org/cpe#product
 :product rdf:type owl:DatatypeProperty ,
                   owl:FunctionalProperty ;
          rdfs:domain :CPEEntry ;
@@ -203,7 +202,7 @@ If it is used, values for edition SHOULD capture edition-related terms applied b
          rdfs:comment "Values for product SHOULD describe or identify the most common and recognizable title or name of the product. Values SHOULD be selected from a specific valid-values list, which MAY be defined by other specifications that utilize this specification. Any character string meeting the requirements for WFNs (cf. 5.3.2) MAY be specified as a value."@en .
 
 
-###  http://cpe#target_HW
+###  http://www.semanticweb.org/cpe#target_HW
 :target_HW rdf:type owl:DatatypeProperty ,
                     owl:FunctionalProperty ;
            rdfs:domain :CPEEntry ;
@@ -211,7 +210,7 @@ If it is used, values for edition SHOULD capture edition-related terms applied b
            rdfs:comment "Values for target_HW SHOULD characterize the instruction set architecture (e.g., x86) on which the product being described or identified by the WFN operates. Bytecode-intermediate languages, such as Java bytecode for the Java Virtual Machine or Microsoft Common Intermediate Language for the Common Language Runtime virtual machine, SHALL be considered instruction set architectures. Values SHOULD be selected from a specific valid-values list, which MAY be defined by other specifications that utilize this specification. Any character string meeting the requirements for WFNs (cf. 5.3.2) MAY be specified as a value."@en .
 
 
-###  http://cpe#target_SW
+###  http://www.semanticweb.org/cpe#target_SW
 :target_SW rdf:type owl:DatatypeProperty ,
                     owl:FunctionalProperty ;
            rdfs:domain :CPEEntry ;
@@ -219,7 +218,7 @@ If it is used, values for edition SHOULD capture edition-related terms applied b
            rdfs:comment "Values for target_SW SHOULD characterize the software computing environment within which the product operates. Values SHOULD be selected from a specific valid-values list, which MAY be defined by other specifications that utilize this specification. Any character string meeting the requirements for WFNs (cf. 5.3.2) MAY be specified as a value."@en .
 
 
-###  http://cpe#update
+###  http://www.semanticweb.org/cpe#update
 :update rdf:type owl:DatatypeProperty ,
                  owl:FunctionalProperty ;
         rdfs:domain :CPEEntry ;
@@ -227,7 +226,7 @@ If it is used, values for edition SHOULD capture edition-related terms applied b
         rdfs:comment "Values for update SHOULD be vendor-specific alphanumeric strings characterizing the particular update, service pack, or point release of the product. Values SHOULD be selected from a specific valid-values list, which MAY be defined by other specifications that utilize this specification. Any character string meeting the requirements for WFNs (cf. 5.3.2) MAY be specified as a value."@en .
 
 
-###  http://cpe#vendor
+###  http://www.semanticweb.org/cpe#vendor
 :vendor rdf:type owl:DatatypeProperty ,
                  owl:FunctionalProperty ;
         rdfs:domain :CPEEntry ;
@@ -235,7 +234,7 @@ If it is used, values for edition SHOULD capture edition-related terms applied b
         rdfs:comment "Values for vendor SHOULD describe or identify the person or organization that manufactured or created the product. Values SHOULD be selected from a specific valid-values list, which MAY be defined by other specifications that utilize this specification. Any character string meeting the requirements for WFNs (cf. 5.3.2) MAY be specified as a value."@en .
 
 
-###  http://cpe#version
+###  http://www.semanticweb.org/cpe#version
 :version rdf:type owl:DatatypeProperty ,
                   owl:FunctionalProperty ;
          rdfs:domain :CPEEntry ;
@@ -247,19 +246,19 @@ If it is used, values for edition SHOULD capture edition-related terms applied b
 #    Classes
 #################################################################
 
-###  http://cpe#AdditionalInformation
+###  http://www.semanticweb.org/cpe#AdditionalInformation
 :AdditionalInformation rdf:type owl:Class ;
                        rdfs:subClassOf :Deprecation ;
                        rdfs:comment "Specifies the deprecation is of type “Additional Information Discovery”"@en .
 
 
-###  http://cpe#Application
+###  http://www.semanticweb.org/cpe#Application
 :Application rdf:type owl:Class ;
              rdfs:subClassOf :CPEEntry ;
              rdfs:comment "The part value “a”, when the WFN is for a class of applications."@en .
 
 
-###  http://cpe#CPE
+###  http://www.semanticweb.org/cpe#CPE
 :CPE rdf:type owl:Class ;
      rdfs:subClassOf :CPEEntry ;
      owl:disjointWith :Deprecated ;
@@ -267,7 +266,7 @@ If it is used, values for edition SHOULD capture edition-related terms applied b
 CPE individual denotes a single CPE Name. It corresponds to cpe-item in CPE XSD."""@en .
 
 
-###  http://cpe#CPEEntry
+###  http://www.semanticweb.org/cpe#CPEEntry
 :CPEEntry rdf:type owl:Class ;
           owl:disjointWith :Deprecation ;
           owl:disjointUnionOf ( :Application
@@ -280,13 +279,13 @@ CPE individual denotes a single CPE Name. It corresponds to cpe-item in CPE XSD.
                               ) .
 
 
-###  http://cpe#Deprecated
+###  http://www.semanticweb.org/cpe#Deprecated
 :Deprecated rdf:type owl:Class ;
             rdfs:subClassOf :CPEEntry ;
             rdfs:comment "Deprecated represents CPE identifiers that have been deprecated. These are cpe-item with attribute deprecated set to true."@en .
 
 
-###  http://cpe#Deprecation
+###  http://www.semanticweb.org/cpe#Deprecation
 :Deprecation rdf:type owl:Class ;
              owl:disjointUnionOf ( :AdditionalInformation
                                    :NameCorrection
@@ -295,30 +294,30 @@ CPE individual denotes a single CPE Name. It corresponds to cpe-item in CPE XSD.
              rdfs:comment "An element containing information for a specific deprecation of an identifier name. A single deprecation element may contain a list of names that the enclosing identifier name was deprecated by. One deprecation element represents a deprecation that occurred at a specific instant in time; it is possible that additional deprecations will occur at a later instant in time. If a dictionary maintainer must submit deprecation entries after the initial deprecation, then another deprecation element should be added to the identifier name." .
 
 
-###  http://cpe#Hardware
+###  http://www.semanticweb.org/cpe#Hardware
 :Hardware rdf:type owl:Class ;
           rdfs:subClassOf :CPEEntry ;
           rdfs:comment "The part value “h”, when the WFN is for a class of hardware devices."@en .
 
 
-###  http://cpe#NameCorrection
+###  http://www.semanticweb.org/cpe#NameCorrection
 :NameCorrection rdf:type owl:Class ;
                 rdfs:subClassOf :Deprecation ;
                 rdfs:comment "Specifies the deprecation is of type “Identifier Name Correction”"@en .
 
 
-###  http://cpe#NameRemoval
+###  http://www.semanticweb.org/cpe#NameRemoval
 :NameRemoval rdf:type owl:Class ;
              rdfs:subClassOf :Deprecation ;
              rdfs:comment "Specifies the deprecation is of type “Identifier Name Removal”"@en .
 
 
-###  http://cpe#NotAHO
+###  http://www.semanticweb.org/cpe#NotAHO
 :NotAHO rdf:type owl:Class ;
         rdfs:subClassOf :CPEEntry .
 
 
-###  http://cpe#OS
+###  http://www.semanticweb.org/cpe#OS
 :OS rdf:type owl:Class ;
     rdfs:subClassOf :CPEEntry ;
     rdfs:comment "The part value “o”, when the WFN is for a class of operating systems."@en .
