@@ -5,7 +5,7 @@
 @prefix xml: <http://www.w3.org/XML/1998/namespace> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
-@base <http://www.semanticweb.org/cpe> .
+@base <http://www.semanticweb.org/cpe#> .
 
 <http://www.semanticweb.org/cpe> rdf:type owl:Ontology ;
                                   :generator """PRODUCT_NAME
@@ -23,7 +23,7 @@ Neal Ziring, Andrew Buttner, David Waltermire
 2.3
 2011-07-29"""@en ;
                                   rdfs:isDefinedBy "Vladimir Dimitrov"@en ;
-                                  owl:versionInfo "3.0.0"@en .
+                                  owl:versionInfo "3.1"@en .
 
 #################################################################
 #    Annotation properties
@@ -33,7 +33,7 @@ Neal Ziring, Andrew Buttner, David Waltermire
 :check rdf:type owl:AnnotationProperty ;
        rdfs:comment """The CheckType complex type is used to define an element to hold information about an individual check. It includes a checking system specification URI, string content, and an optional external file reference. The checking system specification should be the URI for a particular version of OVAL or a related system testing language, and the content will be an identifier of a test written in that language. The external file reference could be used to point to the file in which the content test identifier is defined.
 The last two lines are the atrributes system and href."""@en ;
-       rdfs:range rdf:PlainLiteral ;
+       rdfs:range xsd:string ;
        rdfs:domain :CPE .
 
 
@@ -44,21 +44,22 @@ The optional product_name element specifies the name of the application used to 
 The optional product_version element specifies the version of the application used to generate the file.
 The required schema_version element specifies the version of the schema that the document has been written against and that should be used for validation.
 The required timestamp element specifies when the particular document was compiled. The format for the timestamp is yyyy-mm-ddThh:mm:ss. Note that the timestamp element does not specify when an item in the document was created or modified but rather when the actual XML document that contains the items was created.
-For example, a document might pull a bunch of existing items together, each of which was created at some point in the past. The timestamp in this case would be when this combined document was created."""@en ;
-           rdfs:range rdf:PlainLiteral .
+For example, a document might pull a bunch of existing items together, each of which was created at some point in the past. The timestamp in this case would be when this combined document was created.
+Ontology level."""@en ;
+           rdfs:range xsd:string .
 
 
 ###  http://www.semanticweb.org/cpe#note
 :note rdf:type owl:AnnotationProperty ;
       rdfs:comment "The NotesType complex type defines an element that consists of one or more child note elements. It is assumed that each of these note elements is representative of the same language as defined by their parent."@en ;
-      rdfs:range rdf:PlainLiteral ;
+      rdfs:range xsd:string ;
       rdfs:domain :CPE .
 
 
 ###  http://www.semanticweb.org/cpe#provenance-record
 :provenance-record rdf:type owl:AnnotationProperty ;
                    rdfs:comment "The provenance-record contains information about the CPE submitter (name, system id, date of submission), involved CPE authorities (name, system id, date of involvement) and changes (date of change, evidence, evidence type, comments)."@en ;
-                   rdfs:range rdf:PlainLiteral ;
+                   rdfs:range xsd:string ;
                    rdfs:domain :CPE .
 
 
@@ -66,7 +67,7 @@ For example, a document might pull a bunch of existing items together, each of w
 :reference rdf:type owl:AnnotationProperty ;
            rdfs:comment """The reference collects several individual references. Each reference consists of a piece of text (intended to be human-readable) and a URI (intended to be a URL, and point to a real resource) and is used to point to extra descriptive material, for example a supplier's web site or platform documentation.
 The reference URI is the last line."""@en ;
-           rdfs:range rdf:PlainLiteral ;
+           rdfs:range xsd:string ;
            rdfs:domain :CPE .
 
 
@@ -74,7 +75,7 @@ The reference URI is the last line."""@en ;
 :title rdf:type owl:AnnotationProperty ;
        rdfs:comment """The title is a string with xml:lang attribute to associate a specific language with an element's string content. There is no more than one title for every language.
 This is the human readable name of the identifier."""@en ;
-       rdfs:range rdf:PlainLiteral ;
+       rdfs:range xsd:string ;
        rdfs:domain :CPE .
 
 
@@ -93,10 +94,6 @@ owl:versionInfo rdf:type owl:AnnotationProperty .
 #################################################################
 #    Datatypes
 #################################################################
-
-###  http://www.w3.org/1999/02/22-rdf-syntax-ns#PlainLiteral
-rdf:PlainLiteral rdf:type rdfs:Datatype .
-
 
 ###  http://www.w3.org/2001/XMLSchema#anyURI
 xsd:anyURI rdf:type rdfs:Datatype .
@@ -335,4 +332,4 @@ CPE individual denotes a single CPE Name. It corresponds to cpe-item in CPE XSD.
 ] .
 
 
-###  Generated by the OWL API (version 4.5.9.2019-02-01T07:24:44Z) https://github.com/owlcs/owlapi
+###  Generated by the OWL API (version 4.5.25.2023-02-15T19:15:49Z) https://github.com/owlcs/owlapi

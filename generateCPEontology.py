@@ -83,61 +83,61 @@ def generateIndividual(CPE23Names, inQueue, outQueue, separate, readLock):
 
                 print("Processing: " + cpe22name)
                         
-                result = "\r###  " + cpe22name + "\n<" + cpe22name + ">\r\trdf:type owl:NamedIndividual"
+                result = "\n###  " + cpe22name + "\n<" + cpe22name + ">\n\trdf:type owl:NamedIndividual"
                 cpe23_item = item.find(ext_string + "cpe23-item")
-                name_parts = cpe23_item.attrib["name"].replace("\\:", "\r").split(":")
+                name_parts = cpe23_item.attrib["name"].replace("\\:", "\n").split(":")
                 for i in range(len(name_parts)):
-                        name_parts[i] = name_parts[i].replace("\r", ":")
+                        name_parts[i] = name_parts[i].replace("\n", ":")
                         if name_parts[i] and name_parts[i] != "*" and i != 3:
                                 if name_parts[i] == "-": name_parts[i] = ""
                 cpe, cpe_ver, part, vendor, product, version, update, edition, language, SW_edition, target_SW, target_HW, other = name_parts
                 if "deprecated" in item.attrib:
-                        result += " ;\r\trdf:type :Deprecated"
+                        result += " ;\n\trdf:type :Deprecated"
                 else:
-                        result += " ;\r\trdf:type :CPE"
+                        result += " ;\n\trdf:type :CPE"
                 if part != "*":
                         if part == "a":
-                                result += " ;\r\trdf:type :Application"
+                                result += " ;\n\trdf:type :Application"
                         elif part == "o":
-                                result += " ;\r\trdf:type :OS"
+                                result += " ;\n\trdf:type :OS"
                         elif part == "h":
-                                result += " ;\r\trdf:type :Hardware"
+                                result += " ;\n\trdf:type :Hardware"
                         elif part == "":
-                                result += " ;\r\trdf:type :NotAHO"
+                                result += " ;\n\trdf:type :NotAHO"
                         else:
                                 raise ValueError(cpe23name + "=>" + part)
                 for title in item.findall(dict_string + "title"):
-                        result += " ;\r\t:title \"" + codeString(title.text) + "\""
+                        result += " ;\n\t:title \"" + codeString(title.text) + "\""
                         lang = title.attrib[lang_string]
                         if lang is not None: result += "@" + lang
                 for notes in item.findall(dict_string + "notes"):
                         lang = notes.attrib[lang_string]
                         for note in notes.findall(dict_string + "note"):
-                                result += ' ;\r\t:note "' + codeString(note.text) + '"'
+                                result += ' ;\n\t:note "' + codeString(note.text) + '"'
                                 if lang is not None: result += "@" + lang
                 references = item.find(dict_string + "references")
                 if references is not None:
                         for reference in references.findall(dict_string + "reference"):
-                                result += ' ;\r\t:reference """' + codeString(reference.text)
+                                result += ' ;\n\t:reference """' + codeString(reference.text)
                                 href = reference.attrib["href"]
                                 if href is not None:
                                         result += "\nHREF: " + codeString(href)
                                 result += '"""'
                 for check in item.findall(dict_string + "check"):
-                        result += ' ;\r\t:check """' + codeString(check.text)
+                        result += ' ;\n\t:check """' + codeString(check.text)
                         result += codeString(check.text) + "\nSystem: " + codeString(check.attrib["system"])
                         if "href" in check.attrib: result += "\nHREF: " + codeString(check.attrib["href"])
                         result += '"""'
                 for provenance_record in item.findall(dict_string + "provenance-record"):
-                        result += ' ;\r\t:provenance-record """'
+                        result += ' ;\n\t:provenance-record """'
                         submitter = provenance_record.find(dict_string + "submitter")
-                        result += "\nSubmitter:\r\t" + codeString(submitter.text)
+                        result += "\nSubmitter:\n\t" + codeString(submitter.text)
                         result += "\n\tName: " + codeString(submitter.attrib["name"])
                         result += "\n\tSystem-ID: " + codeString(submitter.attrib["system-id"])
                         result += "\n\tDate: " + codeString(submitter.attrib["date"])
                         for authority in provenance_record.findall(dict_string + "authority"):
-                                result += "\nAuthority:\r\t" + codeString(authority.text)
-                                result += "\r\tName: " + codeString(authority.attrib["name"])
+                                result += "\nAuthority:\n\t" + codeString(authority.text)
+                                result += "\n\tName: " + codeString(authority.attrib["name"])
                                 result += "\n\tSystem-ID: " + codeString(authority.attrib["system-id"])
                                 result += "\n\tDate: " + codeString(authority.attrib["date"])
                         for change_description in provenance_record.findall(dict_string + "change-description"):
@@ -151,50 +151,51 @@ def generateIndividual(CPE23Names, inQueue, outQueue, separate, readLock):
                                 if comments is not None:
                                         result += "\n\tComments: " + codeString(comments.text)
                         result += '"""'
-                if vendor != "*": result += ' ;\r\t:vendor "' + clear(vendor) + '"'
-                if product != "*": result += ' ;\r\t:product "' + clear(product) + '"'
-                if version != "*": result += ' ;\r\t:version "' + clear(version) + '"'
-                if update != "*": result += ' ;\r\t:update "' + clear(update) + '"'
-                if edition != "*": result += ' ;\r\t:edition "' + clear(edition) + '"'
-                if language != "*": result += ' ;\r\t:language "' + clear(language) + '"'
-                if SW_edition != "*": result += ' ;\r\t:SW_edition "' + clear(SW_edition) + '"'
-                if target_SW != "*": result += ' ;\r\t:target_SW "' + clear(target_SW) + '"'
-                if target_HW != "*": result += ' ;\r\t:target_HW "' + clear(target_HW) + '"'
-                if other != "*": result += ' ;\r\t:other "' + clear(other) + '"'
-                if "deprecation_date" in item.attrib: result += ' ;\r\t:deprecation_date "' + item.attrib["deprecation_date"] + '"^^xsd:dateTime'
+                if vendor != "*": result += ' ;\n\t:vendor "' + clear(vendor) + '"'
+                if product != "*": result += ' ;\n\t:product "' + clear(product) + '"'
+                if version != "*": result += ' ;\n\t:version "' + clear(version) + '"'
+                if update != "*": result += ' ;\n\t:update "' + clear(update) + '"'
+                if edition != "*": result += ' ;\n\t:edition "' + clear(edition) + '"'
+                if language != "*": result += ' ;\n\t:language "' + clear(language) + '"'
+                if SW_edition != "*": result += ' ;\n\t:SW_edition "' + clear(SW_edition) + '"'
+                if target_SW != "*": result += ' ;\n\t:target_SW "' + clear(target_SW) + '"'
+                if target_HW != "*": result += ' ;\n\t:target_HW "' + clear(target_HW) + '"'
+                if other != "*": result += ' ;\n\t:other "' + clear(other) + '"'
+                if "deprecation_date" in item.attrib: result += ' ;\n\t:deprecation_date "' + item.attrib["deprecation_date"] + '"^^xsd:dateTime'
 
                 deprecated_by = item.attrib.get("deprecated_by")
-                if deprecated_by is not None: result += " ;\r\t:deprecated_by <" + deprecated_by + ">"
+                if deprecated_by is not None: result += " ;\n\t:deprecated_by <" + deprecated_by + ">"
 
                 no = 1
                 for deprecation in cpe23_item.findall(ext_string + "deprecation"):
                        dname = cpe22name + "DEPREC" + str(no)
                        for deprecatedBy in deprecation.findall(ext_string + "deprecated-by"):
-                               result += " ;\r\t:deprecation <" + dname + ">"
+                               result += " ;\n\t:deprecation <" + dname + ">"
                                no += 1
 
                 no = 1
                 for deprecation in cpe23_item.findall(ext_string + "deprecation"):
                         dname = cpe22name + "DEPREC" + str(no)
                         for deprecatedBy in deprecation.findall(ext_string + "deprecated-by"):
-                                result += " ;\r\trdf:type owl:Thing .\r###  " + dname + "\n<" + dname + ">\r\trdf:type owl:NamedIndividual"
+                                result += " ;\n\trdf:type owl:Thing .\n###  " + dname + "\n<" + dname + ">\n\trdf:type owl:NamedIndividual"
                                 deprecation_type = deprecatedBy.attrib.get("type")
                                 if deprecation_type == "NAME_CORRECTION":
-                                        result += " ;\r\trdf:type :NameCorrection"
+                                        result += " ;\n\trdf:type :NameCorrection"
                                 elif deprecation_type == "NAME_REMOVAL":
-                                        result += " ;\r\trdf:type :NameRemoval"
+                                        result += " ;\n\trdf:type :NameRemoval"
                                 elif deprecation_type == "ADDITIONAL_INFORMATION":
-                                        result += " ;\r\trdf:type :AdditionalInformation"
+                                        result += " ;\n\trdf:type :AdditionalInformation"
                                 for cpe22 in getByWildCards(CPE23Names, deprecatedBy.attrib["name"]):
                                         if cpe22 != cpe22name:
-                                                result += " ;\r\trdf:deprecated-by <" + cpe22 + ">"
+                                                result += " ;\n\trdf:deprecated-by <" + cpe22 + ">"
 
-                outQueue.put(result + " ;\r\trdf:type owl:Thing .\r")
+                outQueue.put(result + " ;\n\trdf:type owl:Thing .\n")
                 item = inQueue.get()
 
 def writeResults(q, separate, np, lock, generator):
 
         def generateShell(out_file):
+
                 with open("shell.ttl", mode='r', encoding='utf-8') as in_file:
                         shell = in_file.read()
                         if generator is not None:
@@ -323,7 +324,7 @@ def generateIndividuals(root, separate):
         print("Processing finished")
 
 def main(download, separate):
-        print("CPE 2.3 Ontology Generator, Version 8.4")
+        print("CPE 2.3 Ontology Generator, Version 8.6")
         start = datetime.now()
         print(start)
         if download:
