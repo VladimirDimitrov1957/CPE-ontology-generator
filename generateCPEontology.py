@@ -187,7 +187,7 @@ def generateIndividual(CPE23Names, inQueue, outQueue, separate, readLock):
                                         result += " ;\n\trdf:type :AdditionalInformation"
                                 for cpe22 in getByWildCards(CPE23Names, deprecatedBy.attrib["name"]):
                                         if cpe22 != cpe22name:
-                                                result += " ;\n\trdf:deprecated-by <" + cpe22 + ">"
+                                                result += " ;\n\t:deprecated-by <" + cpe22 + ">"
 
                 outQueue.put(result + " ;\n\trdf:type owl:Thing .\n")
                 item = inQueue.get()
@@ -324,7 +324,7 @@ def generateIndividuals(root, separate):
         print("Processing finished")
 
 def main(download, separate):
-        print("CPE 2.3 Ontology Generator, Version 8.6")
+        print("CPE 2.3 Ontology Generator, Version 8.7")
         start = datetime.now()
         print(start)
         if download:
